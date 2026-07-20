@@ -1,0 +1,65 @@
+# configs/training_config.yaml
+model:
+  base_model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  hf_token: ${HF_TOKEN}
+  trust_remote_code: false
+  use_auth_token: true
+
+dataset:
+  name: "gbharti/finance-alpaca"
+  text_column: "text"
+  train_split: "train"
+  val_split: "test" # if exists, otherwise will split manually
+  val_size: 0.1
+  max_length: 512
+
+training:
+  output_dir: "./outputs/llama3-finance"
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2e-4
+  num_train_epochs: 3
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  lr_scheduler_type: "cosine"
+  optim: "paged_adamw_32bit"
+  fp16: true
+  bf16: false
+  max_grad_norm: 1.0
+  logging_steps: 10
+  eval_steps: 50
+  save_steps: 50
+  save_total_limit: 3
+  evaluation_strategy: "steps"
+  seed: 42
+  gradient_checkpointing: true
+  run_name: "llama3-finance-qlora"
+
+peft:
+  type: "qlora" # lora or qlora
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+quantization:
+  load_in_4bit: true
+  load_in_8bit: false
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_compute_dtype: "float16"
+  bnb_4bit_use_double_quant: true
+
+tracking:
+  wandb: true
+  wandb_project: "llama3-finance-finetuning"
+  mlflow: false
