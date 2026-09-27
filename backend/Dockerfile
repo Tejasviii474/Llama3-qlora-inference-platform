@@ -7,14 +7,15 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Need ML pipeline requirements as well for evaluation/inference imports
-COPY ../ml_pipeline/requirements.txt /app/ml_pipeline_requirements.txt
+COPY ml_pipeline/requirements.txt /app/ml_pipeline_requirements.txt
 RUN pip install --no-cache-dir -r /app/ml_pipeline_requirements.txt
 
-COPY . .
+COPY backend/ .
+COPY ml_pipeline/ /app/ml_pipeline/
 
 EXPOSE 8000
 
